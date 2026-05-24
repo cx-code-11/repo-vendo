@@ -1,0 +1,141 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--spacing-4);
+  width: 100%;
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--gray-700);
+  margin-bottom: var(--spacing-2);
+}
+
+.dropzone {
+  border: 2px dashed var(--gray-300);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: var(--bg-surface);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.dropzone:hover, .dragging {
+  border-color: var(--primary-500);
+  background-color: var(--primary-50);
+}
+
+.error {
+  border-color: var(--danger);
+  background-color: var(--danger-light);
+}
+
+.uploadIcon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--gray-400);
+  margin-bottom: var(--spacing-3);
+}
+
+.dropText {
+  margin: 0 0 var(--spacing-1) 0;
+  font-size: var(--font-size-sm);
+  color: var(--gray-700);
+}
+
+.browseText {
+  color: var(--primary-600);
+  font-weight: 500;
+}
+
+.helperText {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--gray-500);
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.filePreview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-surface);
+}
+
+.fileInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.fileIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--primary-50);
+  color: var(--primary-600);
+}
+
+.fileIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.fileDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.fileName {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--gray-900);
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fileSize {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--gray-500);
+}
+
+.removeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  color: var(--gray-500);
+  transition: var(--transition-fast);
+}
+
+.removeButton:hover {
+  background-color: var(--danger-light);
+  color: var(--danger);
+}
+
+.errorText {
+  margin: var(--spacing-1) 0 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--danger);
+}

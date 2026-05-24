@@ -1,0 +1,67 @@
+.container {
+  width: 100%;
+  margin-bottom: var(--spacing-8);
+  padding: var(--spacing-4) 0;
+}
+
+.stepsWrapper {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: var(--spacing-1);
+}
+
+.line {
+  height: 5px;
+  background-color: var(--gray-200);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--spacing-2);
+  transition: background-color var(--transition-normal);
+}
+
+.stepNumber {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--gray-500);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Active and Completed States */
+.active .line {
+  background-color: var(--primary-600);
+}
+
+.active .stepNumber {
+  color: var(--primary-600);
+}
+
+.completed .line {
+  background-color: var(--primary-600);
+}
+
+.completed .stepNumber {
+  color: var(--primary-600);
+}
+
+.checkIcon {
+  color: var(--primary-600);
+  margin-left: var(--spacing-1);
+  vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+  .label {
+    display: none;
+  }
+}

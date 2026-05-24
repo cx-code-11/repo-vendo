@@ -1,0 +1,35 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px; /* Pill shape */
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  line-height: 1.25rem;
+  white-space: nowrap;
+}
+
+.pending {
+  background-color: var(--warning-light);
+  color: var(--warning-dark);
+}
+
+.approved {
+  background-color: var(--success-light);
+  color: var(--success-dark);
+}
+
+.rejected {
+  background-color: var(--danger-light);
+  color: var(--danger-dark);
+}
+
+.in_review {
+  background-color: var(--primary-100);
+  color: var(--primary-800);
+}
+
+.default {
+  background-color: var(--gray-100);
+  color: var(--gray-700);
+}
