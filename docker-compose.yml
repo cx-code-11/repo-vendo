@@ -48,6 +48,8 @@ services:
       dockerfile: Dockerfile
       args:
         - VITE_API_BASE_URL=/api
+    environment:
+      - BACKEND_URL=http://backend:3000
     depends_on:
       - backend
 
