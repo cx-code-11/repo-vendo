@@ -86,8 +86,10 @@ export const FinalSubmissionStep: React.FC = () => {
           <h3>Service Details</h3>
           <div className={styles.summaryGrid}>
             <div>
-              <span className={styles.summaryLabel}>Category</span>
-              <span className={styles.summaryValue}>{data.serviceCategory}</span>
+              <span className={styles.summaryLabel}>Services</span>
+              <span className={styles.summaryValue}>
+                {data.services?.map(s => s.serviceCategory === 'Other' ? s.customServiceName : s.serviceCategory).join(', ')}
+              </span>
             </div>
           </div>
         </div>

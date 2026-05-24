@@ -1,13 +1,19 @@
 import { create } from 'zustand';
 
+export interface ServiceEntry {
+  serviceCategory: string;
+  customServiceName?: string;
+  serviceDescription?: string;
+  experience: string;
+}
+
 export interface OnboardingData {
   businessName: string;
   contactPerson: string;
   email: string;
   phone: string;
   address: string;
-  serviceCategory: string;
-  experience: string;
+  services: ServiceEntry[];
   accountHolderName: string;
   bankName: string;
   accountNumber: string;
@@ -39,8 +45,7 @@ const initialState: Partial<OnboardingData> = {
   email: '',
   phone: '',
   address: '',
-  serviceCategory: '',
-  experience: '',
+  services: [],
   accountHolderName: '',
   bankName: '',
   accountNumber: '',

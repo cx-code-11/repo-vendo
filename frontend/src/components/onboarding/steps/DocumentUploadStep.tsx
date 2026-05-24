@@ -1,8 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/common/Button/Button';
 import { useOnboardingStore } from '@/store/onboardingStore';
 import { Upload, CheckCircle2, Trash2 } from 'lucide-react';
 import styles from './Step.module.css';
+
+const FilePreview = ({ file }: { file: File }) => {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [file]);
+
+  if (file.type.startsWith('image/')) {
+    return previewUrl ? <img src={previewUrl} alt="Preview" style={{ width: '100%', height: '100px', objectFit: 'contain', marginBottom: '8px', borderRadius: '4px' }} /> : null;
+  }
+  return <CheckCircle2 size={28} className={styles.uploadIconSuccess} />;
+};
 
 export const DocumentUploadStep: React.FC = () => {
   const { updateData, nextStep, prevStep } = useOnboardingStore();
@@ -51,13 +68,14 @@ export const DocumentUploadStep: React.FC = () => {
             };
             input.click();
           }}
+          style={file ? { padding: '10px' } : {}}
         >
           {file ? (
-            <CheckCircle2 size={28} className={styles.uploadIconSuccess} />
+            <FilePreview file={file} />
           ) : (
             <Upload size={24} className={styles.uploadIconBlue} />
           )}
-          <p className={styles.uploadTitle}>{file ? file.name : title}</p>
+          <p className={styles.uploadTitle} style={file ? { fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%', textAlign: 'center' } : {}}>{file ? file.name : title}</p>
           <p className={styles.uploadSubtitle}>{file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : subtitle}</p>
         </div>
         

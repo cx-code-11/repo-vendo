@@ -71,14 +71,7 @@ export default function BecomePartnerPage() {
         <h1 className={styles.pageTitle}>Become a partner</h1>
         
         <div className={styles.headerActions}>
-          <div className={styles.searchWrapper}>
-            <Search size={18} className={styles.searchIcon} />
-            <input 
-              type="text" 
-              placeholder="Search records..." 
-              className={styles.searchInput}
-            />
-          </div>
+
           
           <button className={styles.iconButton}>
             <SlidersHorizontal size={18} />

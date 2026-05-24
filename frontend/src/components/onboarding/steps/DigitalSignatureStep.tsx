@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import SignatureCanvas from 'react-signature-canvas';
 import { Button } from '@/components/common/Button/Button';
 import { useOnboardingStore } from '@/store/onboardingStore';
@@ -7,6 +8,7 @@ import styles from './Step.module.css';
 import { AlertCircle, Download, Clock } from 'lucide-react';
 
 export const DigitalSignatureStep: React.FC = () => {
+  const router = useRouter();
   const { data, updateData, prevStep } = useOnboardingStore();
   const signaturePadRef = useRef<SignatureCanvas>(null);
   const pdfContainerRef = useRef<HTMLDivElement>(null);
@@ -54,12 +56,12 @@ export const DigitalSignatureStep: React.FC = () => {
         const fileName = `${data.contactPerson?.replace(/\s+/g, '_') || 'Vendor'}_VyessFMS_Agreement.pdf`;
 
         const opt = {
-          margin:       [15, 15, 15, 15], // 15mm margin on all pages
+          margin:       15, // 15mm margin on all pages
           filename:     fileName,
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2, useCORS: true, logging: false, windowWidth: 794 }, // 794px is exactly A4 width at 96dpi
+          image:        { type: 'jpeg', quality: 1 },
+          html2canvas:  { scale: 2, useCORS: true, logging: false }, 
           jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr, h3, h4, p, ul, .sigBox' } // Prevents cutting lines of text in half
+          pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr, h3, h4, .sigBox' } // Allow 'p' to break across pages to fix alignment
         };
 
         // This handles multi-page automatically
@@ -99,8 +101,8 @@ export const DigitalSignatureStep: React.FC = () => {
         a.click();
         URL.revokeObjectURL(url);
         
-        // Open the success page in a new tab as requested
-        window.open('/onboarding/success', '_blank');
+        // Navigate to the success/verification pending page
+        router.push('/onboarding/success');
       }
     } catch (err) {
       console.error('Error generating PDF:', err);
@@ -150,7 +152,7 @@ export const DigitalSignatureStep: React.FC = () => {
 
         {/* Hidden Container for PDF Generation */}
         <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-          <div ref={pdfContainerRef} style={{ width: '794px', backgroundColor: '#ffffff', color: '#000000' }}>
+          <div ref={pdfContainerRef} style={{ width: '680px', backgroundColor: '#ffffff', color: '#000000', fontSize: '14px', fontFamily: 'Arial, sans-serif' }}>
             <AgreementContent 
               companyName={data.businessName || 'Business Name'}
               contactName={data.contactPerson || 'Authorized Signatory'}

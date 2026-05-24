@@ -130,15 +130,40 @@ export default function VendorDetailsPage() {
           {/* Service Details */}
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>Service Details</h2>
-            <div className={styles.infoGrid2Col}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               
-              {Array.isArray(vendor.services) ? vendor.services.map((service: any, index: number) => (
-                <div key={index} className={styles.infoItem}>
-                  <div className={styles.infoItemHeader}>
-                    <Wrench size={16} />
-                    <span>Service</span>
+              {Array.isArray(vendor.services) && vendor.services.length > 0 ? vendor.services.map((service: any, index: number) => (
+                <div key={index} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: index !== vendor.services.length - 1 ? '1.5rem' : 0, borderBottom: index !== vendor.services.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                  <div className={styles.infoGrid2Col}>
+                    <div className={styles.infoItem}>
+                      <div className={styles.infoItemHeader} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Wrench size={16} />
+                        <span>Service</span>
+                        {service.serviceCategory === 'Other' && (
+                          <span style={{ fontSize: '0.75rem', backgroundColor: '#dcfce7', color: '#16a34a', padding: '0.1rem 0.5rem', borderRadius: '1rem', border: '1px solid #4ade80', fontWeight: 500 }}>Other</span>
+                        )}
+                      </div>
+                      <div className={styles.infoValue} style={{ marginTop: '0.25rem' }}>{service.serviceCategory === 'Other' ? service.customServiceName : service.serviceCategory}</div>
+                    </div>
+
+                    <div className={styles.infoItem}>
+                      <div className={styles.infoItemHeader}>
+                        <Clock size={16} />
+                        <span>Experience</span>
+                      </div>
+                      <div className={styles.infoValue} style={{ marginTop: '0.25rem' }}>{service.experience}</div>
+                    </div>
                   </div>
-                  <div className={styles.infoValue}>{service.name || 'Service'}</div>
+                  
+                  {service.serviceCategory === 'Other' && service.serviceDescription && (
+                    <div className={styles.infoItem} style={{ marginTop: '0.5rem' }}>
+                      <div className={styles.infoItemHeader}>
+                        <FileText size={16} />
+                        <span>Service Description</span>
+                      </div>
+                      <div className={styles.infoValue} style={{ lineHeight: '1.5', marginTop: '0.5rem' }}>{service.serviceDescription}</div>
+                    </div>
+                  )}
                 </div>
               )) : (
                 <div className={styles.infoItem}>

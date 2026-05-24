@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './admin.module.css';
 import { 
   LayoutDashboard, 
@@ -22,6 +22,30 @@ import { usePathname } from 'next/navigation';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (sessionStorage.getItem('adminAuth') === 'true') {
+      setIsAuthenticated(true);
+    }
+    setIsChecking(false);
+  }, []);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (username === 'admin' && password === 'admin123') {
+      sessionStorage.setItem('adminAuth', 'true');
+      setIsAuthenticated(true);
+      setError('');
+    } else {
+      setError('Invalid username or password');
+    }
+  };
 
   const navItems = [
     { icon: <LayoutDashboard size={20} />, label: 'Dashboard', href: '/admin/dashboard' },
@@ -35,6 +59,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { icon: <AlertCircle size={20} />, label: 'Complaints', href: '/admin/complaints' },
     { icon: <UserPlus size={20} />, label: 'Become a Partner', href: '/admin/become-partner' },
   ];
+
+  if (isChecking) return null;
+
+  if (!isAuthenticated) {
+    return (
+      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f3f4f6' }}>
+        <form onSubmit={handleLogin} style={{ backgroundColor: 'white', padding: '2.5rem', borderRadius: '0.75rem', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', width: '100%', maxWidth: '400px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Logo" style={{ height: '40px' }} />
+          </div>
+          <h2 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>Admin Sign In</h2>
+          {error && <p style={{ color: '#dc2626', marginBottom: '1rem', textAlign: 'center', fontSize: '0.875rem' }}>{error}</p>}
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>Username</label>
+            <input type="text" value={username} onChange={e => setUsername(e.target.value)} style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.375rem', outline: 'none' }} placeholder="admin" required />
+          </div>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#374151' }}>Password</label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} style={{ width: '100%', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '0.375rem', outline: 'none' }} placeholder="••••••••" required />
+          </div>
+          <button type="submit" style={{ width: '100%', padding: '0.75rem', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '0.375rem', cursor: 'pointer', fontWeight: 600, fontSize: '1rem' }}>Sign In</button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.adminLayout}>
