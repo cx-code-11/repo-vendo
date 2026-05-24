@@ -58,9 +58,9 @@ export const DigitalSignatureStep: React.FC = () => {
         const opt = {
           margin:       15, // 15mm margin on all pages
           filename:     fileName,
-          image:        { type: 'jpeg', quality: 1 },
+          image:        { type: 'jpeg' as const, quality: 1 },
           html2canvas:  { scale: 2, useCORS: true, logging: false }, 
-          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          jsPDF:        { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
           pagebreak:    { mode: ['css', 'legacy'], avoid: 'tr, h3, h4, .sigBox' } // Allow 'p' to break across pages to fix alignment
         };
 

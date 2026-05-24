@@ -159,6 +159,29 @@ app.get('/api/vendors/:id', async (req, res) => {
   }
 });
 
+// PATCH update vendor status
+app.patch('/api/vendors/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    // Validate status
+    const validStatuses = ['Pending', 'Reviewed', 'Approved', 'Rejected'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const updatedVendor = await prisma.vendorRegistrationRequest.update({
+      where: { id: req.params.id },
+      data: { status }
+    });
+    
+    res.json(updatedVendor);
+  } catch (error) {
+    console.error('Error updating vendor status:', error);
+    res.status(500).json({ error: 'Failed to update vendor status' });
+  }
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/payments', payment);

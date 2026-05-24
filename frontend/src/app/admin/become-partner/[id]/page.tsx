@@ -2,320 +2,386 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import styles from './vendor-details.module.css';
-import { 
-  Building2, 
-  User, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Wrench, 
-  Clock, 
-  FileText, 
-  ShieldCheck, 
-  CreditCard,
-  Wallet,
-  CheckCircle2,
-  Eye,
-  Download,
-  XCircle,
-  CheckCircle
-} from 'lucide-react';
+import styles from './vendorDetailsOutlet.module.css';
 
 export default function VendorDetailsPage() {
-  const params = useParams();
-  const id = params.id as string;
-  const [vendor, setVendor] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+    const params = useParams();
+    const id = params.id as string;
+    const [registration, setRegistration] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!id) return;
-    const fetchVendor = async () => {
-      try {
-        const res = await fetch(`/api/vendors/${id}`);
-        const data = await res.json();
-        setVendor(data);
-      } catch (err) {
-        console.error('Error fetching vendor:', err);
-      } finally {
-        setLoading(false);
-      }
+    const updateStatus = async (newStatus: string) => {
+        try {
+            const res = await fetch(`/api/vendors/${id}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus }),
+            });
+            if (res.ok) {
+                setRegistration((prev: any) => ({ ...prev, status: newStatus }));
+            } else {
+                alert('Failed to update status');
+            }
+        } catch (err) {
+            console.error('Failed to update status:', err);
+            alert('Error updating status');
+        }
     };
-    fetchVendor();
-  }, [id]);
 
-  if (loading) return <div style={{padding: '2rem'}}>Loading vendor details...</div>;
-  if (!vendor) return <div style={{padding: '2rem'}}>Vendor not found</div>;
+    useEffect(() => {
+        if (!id) return;
+        const fetchVendor = async () => {
+            try {
+                const res = await fetch(`/api/vendors/${id}`);
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    setError('Unable to load registration');
+                    return;
+                }
+                
+                setRegistration(data);
+                
+                if (data.status === 'Pending') {
+                    await fetch(`/api/vendors/${id}/status`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'Reviewed' }),
+                    });
+                    setRegistration((prev: any) => ({ ...prev, status: 'Reviewed' }));
+                }
+            } catch (err) {
+                console.error('Error fetching vendor:', err);
+                setError('Unable to load registration details');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchVendor();
+    }, [id]);
 
-  const dateObj = new Date(vendor.created);
-  const dateStr = dateObj.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
-  const timeStr = dateObj.toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'});
-
-  return (
-    <div className={styles.pageContainer}>
-      <h1 className={styles.pageTitle}>Vendor Details</h1>
-
-      {/* HEADER CARD */}
-      <div className={styles.headerCard}>
-        <div className={styles.headerIcon}>
-          <Building2 size={32} />
-        </div>
-        <div className={styles.headerInfo}>
-          <div className={styles.headerTitleRow}>
-            <span className={styles.vendorName}>{vendor.businessName}</span>
-            <span className={styles.statusPill}>{vendor.status}</span>
-          </div>
-          <div className={styles.headerMeta}>
-            <span className={styles.metaItem}>{vendor.uiId}</span>
-            <span>•</span>
-            <span className={styles.metaItem}>
-              <Clock size={14} /> Applied: {dateStr} at {timeStr}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* MAIN GRID */}
-      <div className={styles.layoutGrid}>
-        
-        {/* LEFT COLUMN */}
-        <div className={styles.leftCol}>
-          
-          {/* Basic Information */}
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Basic Information</h2>
-            <div className={styles.infoGrid2Col}>
-              <div className={styles.infoItem}>
-                <div className={styles.infoItemHeader}>
-                  <Building2 size={16} />
-                  <span>Business Name</span>
-                </div>
-                <div className={styles.infoValue}>{vendor.businessName}</div>
-              </div>
-
-              <div className={styles.infoItem}>
-                <div className={styles.infoItemHeader}>
-                  <User size={16} />
-                  <span>Contact Person</span>
-                </div>
-                <div className={styles.infoValue}>{vendor.contactPerson}</div>
-              </div>
-
-              <div className={styles.infoItem}>
-                <div className={styles.infoItemHeader}>
-                  <Phone size={16} />
-                  <span>Phone Number</span>
-                </div>
-                <div className={styles.infoValue}>{vendor.phone}</div>
-              </div>
-
-              <div className={styles.infoItem}>
-                <div className={styles.infoItemHeader}>
-                  <Mail size={16} />
-                  <span>Email Address</span>
-                </div>
-                <div className={styles.infoValue}>{vendor.email}</div>
-              </div>
-
-              <div className={styles.infoItem} style={{ gridColumn: '1 / -1' }}>
-                <div className={styles.infoItemHeader}>
-                  <MapPin size={16} />
-                  <span>Full Address</span>
-                </div>
-                <div className={styles.infoValue}>{vendor.address}</div>
-              </div>
+    if (loading) {
+        return (
+            <div className={styles.mainContent}>
+                <p>Loading vendor details...</p>
             </div>
-          </div>
+        );
+    }
 
-          {/* Service Details */}
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Service Details</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              
-              {Array.isArray(vendor.services) && vendor.services.length > 0 ? vendor.services.map((service: any, index: number) => (
-                <div key={index} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingBottom: index !== vendor.services.length - 1 ? '1.5rem' : 0, borderBottom: index !== vendor.services.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
-                  <div className={styles.infoGrid2Col}>
-                    <div className={styles.infoItem}>
-                      <div className={styles.infoItemHeader} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <Wrench size={16} />
-                        <span>Service</span>
-                        {service.serviceCategory === 'Other' && (
-                          <span style={{ fontSize: '0.75rem', backgroundColor: '#dcfce7', color: '#16a34a', padding: '0.1rem 0.5rem', borderRadius: '1rem', border: '1px solid #4ade80', fontWeight: 500 }}>Other</span>
-                        )}
-                      </div>
-                      <div className={styles.infoValue} style={{ marginTop: '0.25rem' }}>{service.serviceCategory === 'Other' ? service.customServiceName : service.serviceCategory}</div>
+    if (error || !registration) {
+        return (
+            <div className={styles.mainContent}>
+                <p style={{ color: '#DC2626' }}>{error || 'No registration data found'}</p>
+            </div>
+        );
+    }
+
+    const formatDate = (dateString: string) => {
+        if (!dateString) return 'Oct 24, 2023 at 10:30 AM';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    };
+
+    return (
+        <div className={styles.mainContent}>
+            {/* Top Main Heading */}
+            <header className={styles.header}>
+                <h1 className={styles.pageTitle}>Vendor Details</h1>
+            </header>
+
+            {/* Profile Hero Header Banner */}
+            <div className={styles.heroCard}>
+                <div className={styles.heroLeft}>
+                    <div className={styles.heroIconBox}>
+                        <img src="/assets/admin_icons/icon-vendorDetailsCompanyLogo.svg" alt="Company Logo" className={styles.heroIcon} />
+                    </div>
+                    <div>
+                        <div className={styles.heroTitleRow}>
+                            <h2 className={styles.vendorHeading}>{registration.businessName || 'Cool Air Tech'}</h2>
+                            <span className={`${styles.statusBadgeHero} ${
+                                registration.status === 'Approved' ? styles.statusApproved : 
+                                registration.status === 'Rejected' ? styles.statusRejected : 
+                                registration.status === 'Reviewed' ? styles.statusReviewed : 
+                                styles.statusPending
+                            }`}>
+                                <span className={styles.statusDotHero}></span>
+                                {registration.status || 'Pending'}
+                            </span>
+                        </div>
+                        <div className={styles.heroMetaRow}>
+                            <span>{registration.uiId || 'REC-00028'}</span>
+                            <span className={styles.bullet}>•</span>
+                            <span className={styles.metaTime}>
+                                <img src="/assets/admin_icons/icon-vendorDetailsTime.svg" alt="Time Icon" className={styles.metaTimeIcon} />
+                                Applied: {formatDate(registration.created)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Two Column Section Layout */}
+            <div className={styles.contentGrid}>
+
+                {/* Left Core Profile Content Column */}
+                <div className={styles.leftColumn}>
+
+                    {/* Basic Information Section */}
+                    <div className={styles.card}>
+                        <h3 className={styles.cardTitle}>Basic Information</h3>
+                        <div className={styles.basicInfoGrid}>
+                            <div className={styles.fieldRow}>
+                                <img src="/assets/admin_icons/icon-vendorDetailsBusinessName.svg" alt="Company Logo" />
+                                <div>
+                                    <label className={styles.fieldLabel}>Business Name</label>
+                                    <div className={styles.fieldValue}>{registration.businessName || 'Cool Air Tech Services Pvt. Ltd.'}</div>
+                                </div>
+                            </div>
+                            <div className={styles.fieldRow}>
+                                <img src="/assets/admin_icons/icon-vendorDetailsContactPerson.svg" alt="Contact Person" />
+                                <div>
+                                    <label className={styles.fieldLabel}>Contact Person</label>
+                                    <div className={styles.fieldValue}>{registration.contactPerson || 'Rahul Sharma'}</div>
+                                </div>
+                            </div>
+                            <div className={styles.fieldRow}>
+                                <img src="/assets/admin_icons/icon-vendorDetailsPhoneNumber.svg" alt="Phone Number" />
+                                <div>
+                                    <label className={styles.fieldLabel}>Phone Number</label>
+                                    <div className={styles.fieldValue}>{registration.phone || '+91 98765 43210'}</div>
+                                </div>
+                            </div>
+                            <div className={styles.fieldRow}>
+                                <img src="/assets/admin_icons/icon-vendorDetailsEmailAddress.svg" alt="Email Address" />
+                                <div>
+                                    <label className={styles.fieldLabel}>Email Address</label>
+                                    <div className={styles.fieldValue}>{registration.email || 'contact@coolairtech.in'}</div>
+                                </div>
+                            </div>
+                            <div className={`${styles.fieldRow} ${styles.fullWidthField}`}>
+                                <img src="/assets/admin_icons/icon-vendorDetailsFullAddress.svg" alt="Full Address" />
+                                <div>
+                                    <label className={styles.fieldLabel}>Full Address</label>
+                                    <div className={styles.fieldValue}>
+                                        {registration.address || '123, Tech Park, Phase 2, Electronic City, Bangalore, Karnataka 560100'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className={styles.infoItem}>
-                      <div className={styles.infoItemHeader}>
-                        <Clock size={16} />
-                        <span>Experience</span>
-                      </div>
-                      <div className={styles.infoValue} style={{ marginTop: '0.25rem' }}>{service.experience}</div>
+                    {/* Service Details Section */}
+                    <div className={styles.card}>
+                        <h3 className={styles.cardTitle}>Service Details</h3>
+                        <div className={styles.serviceRowsContainer}>
+                            {registration.services && registration.services.length > 0 ? (
+                                registration.services.map((service: any, index: number) => (
+                                    <div key={index} className={styles.serviceItemWrapper}>
+                                        <div className={styles.serviceSplitRow}>
+                                            <div className={styles.fieldRow}>
+                                                <img src="/assets/admin_icons/icon-vendorDetailsService.svg" alt="Service" />
+                                                <div>
+                                                    {service.serviceCategory === 'Other' ? (
+                                                        <div className={styles.labelWithTagContainer}>
+                                                            <label className={styles.fieldLabel}>Service</label>
+                                                            <span className={styles.inlineOtherTag}>Other</span>
+                                                        </div>
+                                                    ) : (
+                                                        <label className={styles.fieldLabel}>Service</label>
+                                                    )}
+                                                    <div className={styles.fieldValue}>
+                                                        {service.serviceCategory === 'Other' ? service.customServiceName : service.serviceCategory}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className={styles.fieldRow}>
+                                                <img src="/assets/admin_icons/icon-vendorDetailsTime.svg" alt="Experience" />
+                                                <div>
+                                                    <label className={styles.fieldLabel}>Experience</label>
+                                                    <div className={styles.fieldValue}>
+                                                        {service.experience}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {service.serviceCategory === 'Other' && service.serviceDescription && (
+                                            <div className={styles.descriptionRow}>
+                                                <img src="/assets/admin_icons/icon-vendorDetailsDescription.svg" alt="Description" />
+                                                <div>
+                                                    <label className={styles.fieldLabelDesc}>Service Description</label>
+                                                    <div className={styles.descriptionText}>
+                                                        {service.serviceDescription}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className={styles.serviceItemWrapper}>
+                                    <div className={styles.serviceSplitRow}>
+                                        <div className={styles.fieldRow}>
+                                            <img src="/assets/admin_icons/icon-vendorDetailsService.svg" alt="Service" />
+                                            <div>
+                                                <label className={styles.fieldLabel}>Service</label>
+                                                <div className={styles.fieldValue}>Data pending</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                  </div>
-                  
-                  {service.serviceCategory === 'Other' && service.serviceDescription && (
-                    <div className={styles.infoItem} style={{ marginTop: '0.5rem' }}>
-                      <div className={styles.infoItemHeader}>
-                        <FileText size={16} />
-                        <span>Service Description</span>
-                      </div>
-                      <div className={styles.infoValue} style={{ lineHeight: '1.5', marginTop: '0.5rem' }}>{service.serviceDescription}</div>
+
+                    {/* Documents Section */}
+                    <div className={styles.card}>
+                        <h3 className={styles.cardTitle}>Documents</h3>
+                        <div className={styles.docList}>
+                            {[
+                                { name: 'Aadhaar Card', url: registration.aadhar },
+                                { name: 'PAN Card', url: registration.pan },
+                                { name: 'GST Certificate', url: registration.gstNumber },
+                                { name: 'Signed Agreement', url: registration.agreementUrl }
+                            ].filter(doc => doc.url).length > 0 ? (
+                                [
+                                    { name: 'Aadhaar Card', url: registration.aadhar },
+                                    { name: 'PAN Card', url: registration.pan },
+                                    { name: 'GST Certificate', url: registration.gstNumber },
+                                    { name: 'Signed Agreement', url: registration.agreementUrl }
+                                ].filter(doc => doc.url).map((doc, index) => (
+                                    <div className={styles.docRow} key={index}>
+                                        <div className={styles.docLeft}>
+                                            <div className={styles.docIconBox}>
+                                                <img src="/assets/admin_icons/icon-vendorDetailsDocument.svg" alt="Document" className={styles.docFileIcon} />
+                                            </div>
+                                            <div>
+                                                <div className={styles.docName}>{doc.name}</div>
+                                                <div className={`${styles.docStatusText} ${styles.statusVerified}`}>
+                                                    <img src="/assets/admin_icons/icon-vendorDetailsVerified.svg" alt="Verified" /> Uploaded
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className={styles.docActions}>
+                                            {doc.name === 'Signed Agreement' && doc.url && (
+                                                <>
+                                                    <button onClick={() => window.open(doc.url, '_blank')} className={styles.docActionBtn}><img src="/assets/admin_icons/icon-vendorDetailsView.svg" alt="View" /></button>
+                                                    <a href={doc.url} download className={styles.docActionBtn}><img src="/assets/admin_icons/icon-vendorDetailsDownload.svg" alt="Download" /></a>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className={styles.docRow}>
+                                    <div className={styles.docLeft}>
+                                        <div className={styles.docIconBox}>
+                                            <img src="/assets/admin_icons/icon-vendorDetailsDocument.svg" alt="Document" className={styles.docFileIcon} />
+                                        </div>
+                                        <div>
+                                            <div className={styles.docName}>No documents uploaded yet.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                  )}
+
                 </div>
-              )) : (
-                <div className={styles.infoItem}>
-                  <div className={styles.infoItemHeader}>
-                    <Wrench size={16} />
-                    <span>Service</span>
-                  </div>
-                  <div className={styles.infoValue}>Data pending</div>
+
+                {/* Right Financial Verification & Action Column */}
+                <div className={styles.rightColumn}>
+
+                    {/* ID Proof Verification Segment */}
+                    <div className={styles.card}>
+                        <h3 className={styles.cardTitle}>ID Proof</h3>
+                        <div className={styles.verticalFields}>
+                            <div className={styles.fieldRow}>
+                                <img src="/assets/admin_icons/icon-vendorDetailsIdProof.svg" alt="ID Proof" />
+                                <div>
+                                    <label className={styles.fieldLabel}>GST Number</label>
+                                    <div className={styles.fieldValueSec}>{registration.gstNumber || '29ABCDE1234F1Z5'}</div>
+                                </div>
+                            </div>
+                            <div className={styles.fieldRow}>
+                                <img src="/assets/admin_icons/icon-vendorDetailsIdProof.svg" alt="IdProof" />
+                                <div>
+                                    <label className={styles.fieldLabel}>Aadhaar Number</label>
+                                    <div className={styles.fieldValueSec}>{registration.aadhar || '[Aadhaar Redacted]'}</div>
+                                </div>
+                            </div>
+                            <div className={styles.fieldRow}>
+                                <img src="/assets/admin_icons/icon-vendorDetailsIdProof.svg" alt="IdProof" />
+                                <div>
+                                    <label className={styles.fieldLabel}>PAN Number</label>
+                                    <div className={styles.fieldValueSec}>{registration.pan || 'ABCDE1234F'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bank Account Details Segment */}
+                    <div className={styles.card}>
+                        <h3 className={styles.cardTitle}>Bank Details</h3>
+                        <div className={styles.verticalFields}>
+                            <div className={styles.fieldRow}>
+                                <img src="/assets/admin_icons/icon_vendorDetailsUser.svg" alt="User" />
+                                <div>
+                                    <label className={styles.fieldLabel}>Account Holder Name</label>
+                                    <div className={styles.fieldValueSec}>{registration.accountHolderName || 'Cool Air Tech Services'}</div>
+                                </div>
+                            </div>
+                            <div className={styles.fieldRow}>
+                                <img src="/assets/admin_icons/icon-vendorDetailsAccCard.svg" alt="Account Card" />
+                                <div>
+                                    <label className={styles.fieldLabel}>Account Number</label>
+                                    <div className={styles.fieldValueSec}>
+                                        {registration.accountNumber ? `••••••••${registration.accountNumber.slice(-4)}` : 'XXXX XXXX 4589'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className={styles.fieldRow}>
+                                <img src="/assets/admin_icons/icon-vendorDetailsIFSC.svg" alt="IFSC Code" />
+                                <div>
+                                    <label className={styles.fieldLabel}>IFSC Code</label>
+                                    <div className={styles.fieldValueSec}>{registration.ifscCode || 'HDFC0001234'}</div>
+                                </div>
+                            </div>
+                            <div className={styles.fieldRow}>
+                                <img src="/assets/admin_icons/icon-vendorDetailsAccCard.svg" alt="UPI ID" />
+                                <div>
+                                    <label className={styles.fieldLabel}>UPI ID</label>
+                                    <div className={styles.fieldValueSec}>{registration.upiId || 'coolair@hdfcbank'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Core Decision Button Group Panel */}
+                    <div className={styles.actionPanel}>
+                        <button 
+                            className={styles.btnReject} 
+                            onClick={() => updateStatus('Rejected')}
+                            disabled={registration.status === 'Rejected'}
+                            style={{ opacity: registration.status === 'Rejected' ? 0.5 : 1, cursor: registration.status === 'Rejected' ? 'not-allowed' : 'pointer' }}
+                        >
+                            <span className={styles.btnRejectIcon}>⊗</span> {registration.status === 'Rejected' ? 'Rejected' : 'Reject'}
+                        </button>
+                        <button 
+                            className={styles.btnApprove} 
+                            onClick={() => updateStatus('Approved')}
+                            disabled={registration.status === 'Approved'}
+                            style={{ opacity: registration.status === 'Approved' ? 0.5 : 1, cursor: registration.status === 'Approved' ? 'not-allowed' : 'pointer' }}
+                        >
+                            <img src="/assets/admin_icons/icon-vendorDetailsApproved.svg" alt="Approved" className={styles.btnApproveIcon} /> {registration.status === 'Approved' ? 'Approved' : 'Approve & Add Vendor'}
+                        </button>
+                    </div>
+
                 </div>
-              )}
+
             </div>
-          </div>
-
-          {/* Documents */}
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Documents</h2>
-            <div className={styles.docList}>
-              
-              <div className={styles.docItem}>
-                <div className={styles.docLeft}>
-                  <div className={styles.docIconBg}><FileText size={20} /></div>
-                  <div className={styles.docInfo}>
-                    <span className={styles.docName}>{vendor.agreementUrl ? 'VyessFMS_Agreement.pdf' : 'Agreement Pending'}</span>
-                    <span className={styles.docStatus}><CheckCircle2 size={12} /> {vendor.agreementUrl ? 'Verified' : 'Pending'}</span>
-                  </div>
-                </div>
-                <div className={styles.docActions}>
-                  {vendor.agreementUrl && (
-                    <a href={vendor.agreementUrl} target="_blank" rel="noopener noreferrer" className={styles.docBtn}><Eye size={18} /></a>
-                  )}
-                  {vendor.agreementUrl && (
-                    <a href={vendor.agreementUrl} download className={styles.docBtn}><Download size={18} /></a>
-                  )}
-                </div>
-              </div>
-
-              {/* Document rows for Aadhar and PAN */}
-              <div className={styles.docItem}>
-                <div className={styles.docLeft}>
-                  <div className={styles.docIconBg}><FileText size={20} /></div>
-                  <div className={styles.docInfo}>
-                    <span className={styles.docName}>Aadhaar Card.jpg</span>
-                    <span className={styles.docStatus}><CheckCircle2 size={12} /> {vendor.aadhar ? 'Verified' : 'Pending'}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.docItem}>
-                <div className={styles.docLeft}>
-                  <div className={styles.docIconBg}><FileText size={20} /></div>
-                  <div className={styles.docInfo}>
-                    <span className={styles.docName}>PAN Card.pdf</span>
-                    <span className={styles.docStatus}><CheckCircle2 size={12} /> {vendor.pan ? 'Verified' : 'Pending'}</span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
 
         </div>
-
-        {/* RIGHT COLUMN */}
-        <div className={styles.rightCol}>
-          
-          {/* ID Proof */}
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>ID Proof</h2>
-            <div className={styles.sideList}>
-              
-              <div className={styles.sideItem}>
-                <div className={styles.sideItemHeader}>
-                  <ShieldCheck size={16} />
-                  <span>GST Number</span>
-                </div>
-                <div className={styles.sideItemValue}>{vendor.gstNumber || 'Not provided'}</div>
-              </div>
-
-              <div className={styles.sideItem}>
-                <div className={styles.sideItemHeader}>
-                  <ShieldCheck size={16} />
-                  <span>Aadhaar Number</span>
-                </div>
-                <div className={styles.sideItemValue}>{vendor.aadhar || 'Not provided'}</div>
-              </div>
-
-              <div className={styles.sideItem}>
-                <div className={styles.sideItemHeader}>
-                  <ShieldCheck size={16} />
-                  <span>PAN Number</span>
-                </div>
-                <div className={styles.sideItemValue}>{vendor.pan || 'Not provided'}</div>
-              </div>
-
-            </div>
-          </div>
-
-          {/* Bank Details */}
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Bank Details</h2>
-            <div className={styles.sideList}>
-              
-              <div className={styles.sideItem}>
-                <div className={styles.sideItemHeader}>
-                  <User size={16} />
-                  <span>Account Holder Name</span>
-                </div>
-                <div className={styles.sideItemValue}>{vendor.accountHolderName}</div>
-              </div>
-
-              <div className={styles.sideItem}>
-                <div className={styles.sideItemHeader}>
-                  <CreditCard size={16} />
-                  <span>Account Number</span>
-                </div>
-                <div className={styles.sideItemValue}>{vendor.accountNumber}</div>
-              </div>
-
-              <div className={styles.sideItem}>
-                <div className={styles.sideItemHeader}>
-                  <Building2 size={16} />
-                  <span>IFSC Code</span>
-                </div>
-                <div className={styles.sideItemValue}>{vendor.ifscCode}</div>
-              </div>
-
-              <div className={styles.sideItem}>
-                <div className={styles.sideItemHeader}>
-                  <Wallet size={16} />
-                  <span>UPI ID</span>
-                </div>
-                <div className={styles.sideItemValue}>{vendor.upiId}</div>
-              </div>
-
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className={styles.actionButtons}>
-            <button className={styles.btnReject}>
-              <XCircle size={18} />
-              Reject
-            </button>
-            <button className={styles.btnApprove}>
-              <CheckCircle size={18} />
-              Approve & Add Vendor
-            </button>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-  );
+    );
 }
