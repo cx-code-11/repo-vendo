@@ -240,15 +240,15 @@ export default function VendorDetailsPage() {
                         <h3 className={styles.cardTitle}>Documents</h3>
                         <div className={styles.docList}>
                             {[
-                                { name: 'Aadhaar Card', url: registration.aadhar },
-                                { name: 'PAN Card', url: registration.pan },
-                                { name: 'GST Certificate', url: registration.gstNumber },
+                                { name: 'Aadhaar Card', url: registration.aadhaarUrl },
+                                { name: 'PAN Card', url: registration.panUrl },
+                                { name: 'GST Certificate', url: registration.gstUrl },
                                 { name: 'Signed Agreement', url: registration.agreementUrl }
                             ].filter(doc => doc.url).length > 0 ? (
                                 [
-                                    { name: 'Aadhaar Card', url: registration.aadhar },
-                                    { name: 'PAN Card', url: registration.pan },
-                                    { name: 'GST Certificate', url: registration.gstNumber },
+                                    { name: 'Aadhaar Card', url: registration.aadhaarUrl },
+                                    { name: 'PAN Card', url: registration.panUrl },
+                                    { name: 'GST Certificate', url: registration.gstUrl },
                                     { name: 'Signed Agreement', url: registration.agreementUrl }
                                 ].filter(doc => doc.url).map((doc, index) => (
                                     <div className={styles.docRow} key={index}>
@@ -264,7 +264,7 @@ export default function VendorDetailsPage() {
                                             </div>
                                         </div>
                                         <div className={styles.docActions}>
-                                            {doc.name === 'Signed Agreement' && doc.url && (
+                                            {doc.url && (
                                                 <>
                                                     <button onClick={() => window.open(doc.url, '_blank')} className={styles.docActionBtn}><img src="/assets/admin_icons/icon-vendorDetailsView.svg" alt="View" /></button>
                                                     <a href={doc.url} download className={styles.docActionBtn}><img src="/assets/admin_icons/icon-vendorDetailsDownload.svg" alt="Download" /></a>
